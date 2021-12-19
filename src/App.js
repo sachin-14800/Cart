@@ -1,36 +1,57 @@
 import React  from "react";
 import Navbar from "./Navbar";
 import Cart from './Cart';
-
+// import  firebase from 'firebase/app';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 class App extends React.Component{
   constructor(){
     super();
     this.state={
         products:[
-            {
-                price:9999,
-                title:'Phone',
-                qty:1,
-                img:'https://cdn-icons.flaticon.com/png/512/2482/premium/2482945.png?token=exp=1639724617~hmac=935df9243982f0f35ec7f57bccae5a03',
-                id:1
-            },
-            {
-                price:5999,
-                title:'Watch',
-                qty:1,
-                img:'https://cdn-icons.flaticon.com/png/512/2523/premium/2523520.png?token=exp=1639724663~hmac=8ccd3a7e4c3598a927b87336b6957894',
-                id:2
-            },
-            {
-                price:2999,
-                title:'Camera',
-                qty:1,
-                img:'https://cdn-icons-png.flaticon.com/512/1042/1042390.png',
-                id:3
-            }
-        ]
+        ],
+        loading:true
     }
 }
+componentDidMount(){
+  // 
+  firebase
+  .firestore()
+  .collection('products')
+  .onSnapshot((snapshot)=>{
+    // console.log(snapshot);
+    const products=snapshot.docs.map((doc)=>{
+      const data=doc.data();
+      data['id']=doc.id;
+      return data;
+    });
+    this.setState({
+      products,
+      loading:false
+    });
+  });
+}
+// {
+//   price:9999,
+//   title:'Phone',
+//   qty:1,
+//   img:'https://cdn-icons-png.flaticon.com/512/15/15874.png',
+//   id:1
+// },
+// {
+//   price:5999,
+//   title:'Watch',
+//   qty:1,
+//   img:'https://cdn-icons-png.flaticon.com/512/916/916337.png',
+//   id:2
+// },
+// {
+//   price:2999,
+//   title:'Camera',
+//   qty:1,
+//   img:'https://cdn-icons-png.flaticon.com/512/1042/1042390.png',
+//   id:3
+// }
 handleIncreaseQuantity=(product)=>{
     const {products}=this.state;
     const index=products.indexOf(product);
@@ -73,10 +94,11 @@ getCartTotal=()=>{
   return value;
 }
 render(){
-  const {products}=this.state;
+  const {products,loading}=this.state;
   return (
     <div className="App">
       <Navbar count={this.getCartCount()}/>
+      {loading && <h1>Loading Products...</h1>}
       <Cart
       products={products}
       onIncreaseQuantity={this.handleIncreaseQuantity}
